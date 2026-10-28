@@ -34,4 +34,34 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t cloudops-api:ci .
+      
+      - name: Run container and verify health
+        run: |
+          docker run -d --name cloudops-api-ci cloudops-api:ci
+
+          for i in {1..15}; do
+            status=$(docker inspect --format='{{.State.Health.Status}}' cloudops-api-ci)
+
+            if [ "$status" = "healthy" ]; then
+              echo "Container is healthy!"
+              exit 0
+            fi
+
+            if [ "$status" = "unhealthy" ]; then
+              echo "Container is unhealthy!"
+              docker logs cloudops-api-ci
+              exit 1
+            fi
+
+            sleep 2
+          done
+
+          echo "Container did not become healthy in time."
+          docker logs cloudops-api-ci
+          exit 1
+
+      - name: Clean up test container
+        if: always()
+        run: docker rm -f cloudops-api-ci || true
+
 
