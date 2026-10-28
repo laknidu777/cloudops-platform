@@ -1,0 +1,12 @@
+
+services:
+  api:
+    build: .
+    image: cloudops-api:1.0
+    container_name: cloudops-api
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    restart: unless-stopped
+
