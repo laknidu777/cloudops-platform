@@ -6,7 +6,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node --env-file=.env app.js",
-    "dev": "node --watch --env-file=.env app.js"
+    "dev": "node --watch --env-file=.env app.js",
+    "test": "node --test"
   },
   "keywords": ["devops", "nodejs", "docker"],
   "author": "",

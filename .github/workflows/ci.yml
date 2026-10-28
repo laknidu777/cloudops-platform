@@ -28,6 +28,9 @@ jobs:
         run: |
           node --check app.js
           node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8'))"
+           
+      - name: Run automated tests
+        run: npm test
 
       - name: Build Docker image
         run: docker build -t cloudops-api:ci .

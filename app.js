@@ -1,6 +1,5 @@
-const http = require("node:http");
 
-const PORT = process.env.PORT;
+const http = require("node:http");
 
 const server = http.createServer((req, res) => {
   if (req.url === "/health" && req.method === "GET") {
@@ -16,6 +15,14 @@ const server = http.createServer((req, res) => {
   res.end(JSON.stringify({ error: "Not found" }));
 });
 
-server.listen(PORT, "0.0.0.0", () => {
-  console.log(`CloudOps API listening on port ${PORT}`);
-});
+// Start the server only when this file is run directly.
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+
+  server.listen(PORT, "0.0.0.0", () => {
+    console.log(`CloudOps API listening on port ${PORT}`);
+  });
+}
+
+module.exports = server;
+
