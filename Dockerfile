@@ -1,4 +1,5 @@
 FROM node:24-alpine
+RUN npm install -g npm@12.2.1
 WORKDIR /app
 COPY app.js package.json ./
 EXPOSE 3000
