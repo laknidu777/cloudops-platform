@@ -1,4 +1,4 @@
-# CloudOps Platform 🚀
+# CloudOps Platform 🚀(Ongoing)
 
 ### End-to-End DevOps, Cloud Infrastructure & Automation Project
 
