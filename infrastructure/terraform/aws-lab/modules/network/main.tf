@@ -22,6 +22,14 @@ resource "aws_security_group" "terraform_lab" {
     cidr_blocks = [var.ssh_allowed_cidr]
   }
 
+  ingress {
+    description = "HTTP access from my public IP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [var.ssh_allowed_cidr]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
