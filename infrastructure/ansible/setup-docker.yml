@@ -1,0 +1,7 @@
+---
+- name: Install Docker on Terraform lab server
+  hosts: webservers
+  become: true
+
+  roles:
+    - docker

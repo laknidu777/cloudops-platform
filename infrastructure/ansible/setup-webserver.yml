@@ -3,36 +3,5 @@
   hosts: webservers
   become: true
 
-  vars:
-    project_name: CloudOps Platform
-    deployment_environment: Learning
-
-  tasks:
-    - name: Update apt package cache
-      ansible.builtin.apt:
-        update_cache: true
-
-    - name: Install Nginx
-      ansible.builtin.apt:
-        name: nginx
-        state: present
-
-    - name: Create custom Nginx landing page
-      ansible.builtin.template:
-        src: templates/index.html.j2
-        dest: /var/www/html/index.html
-        owner: root
-        group: root
-        mode: '0644'
-      notify: Reload Nginx
-    - name: Ensure Nginx is running
-      ansible.builtin.service:
-        name: nginx
-        state: started
-        enabled: true
-
-  handlers:
-    - name: Reload Nginx
-      ansible.builtin.service:
-        name: nginx
-        state: reloaded
+  roles:
+    - webserver

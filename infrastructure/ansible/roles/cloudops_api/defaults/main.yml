@@ -1,0 +1,8 @@
+---
+api_repository: ghcr.io/laknidu777/cloudops-platform
+api_image_tag: latest
+api_image: "{{ api_repository }}:{{ api_image_tag }}"
+
+api_container_name: cloudops-api
+api_port: "3000"
+api_host_port: "3000"

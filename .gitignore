@@ -14,3 +14,7 @@ infrastructure/terraform/aws/
 infrastructure/terraform/awscliv2.zip
 # Ansible local inventory
 infrastructure/ansible/inventory.ini
+# Ansible backup files
+*.bak
+# Terraform working directories
+**/.terraform/

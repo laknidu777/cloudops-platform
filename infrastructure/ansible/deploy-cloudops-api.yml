@@ -1,0 +1,7 @@
+---
+- name: Deploy CloudOps API
+  hosts: webservers
+  become: true
+
+  roles:
+    - cloudops_api

@@ -1,0 +1,25 @@
+---
+- name: Install Python Docker SDK
+  ansible.builtin.apt:
+    name: python3-docker
+    state: present
+    update_cache: true
+
+- name: Pull latest CloudOps API image
+  community.docker.docker_image:
+    name: "{{ api_image }}"
+    source: pull
+    force_source: true
+
+- name: Run CloudOps API container
+  community.docker.docker_container:
+    name: "{{ api_container_name }}"
+    image: "{{ api_image }}"
+    state: started
+    restart_policy: unless-stopped
+    published_ports:
+      - "127.0.0.1:{{ api_host_port }}:{{ api_port }}"
+    env:
+      PORT: "{{ api_port }}"
+    comparisons:
+      image: strict
