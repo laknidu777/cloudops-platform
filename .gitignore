@@ -12,3 +12,5 @@ crash.*.log
 # AWS CLI installation files
 infrastructure/terraform/aws/
 infrastructure/terraform/awscliv2.zip
+# Ansible local inventory
+infrastructure/ansible/inventory.ini
