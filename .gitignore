@@ -1,2 +1,14 @@
 .env
 node_modules/
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfplan
+crash.log
+crash.*.log
+# AWS CLI installation files
+infrastructure/terraform/aws/
+infrastructure/terraform/awscliv2.zip
