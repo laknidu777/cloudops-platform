@@ -23,9 +23,8 @@ variable "subnet_id" {
 }
 
 variable "ssh_allowed_cidr" {
-  description = "Public IP range allowed to SSH into the instance"
+  description = "Current public IP allowed to access the server"
   type        = string
-  default     = "111.223.178.66/32"
 }
 
 variable "key_name" {
