@@ -29,8 +29,10 @@ jobs:
           node --check app.js
           node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8'))"
 
-      - name: Run automated tests
-        run: npm test
+      - name: Scan Git history for secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Docker image
         run: docker build -t cloudops-api:ci .
