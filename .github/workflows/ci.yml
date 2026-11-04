@@ -1,4 +1,3 @@
-
 name: CloudOps Platform CI
 
 on:
@@ -103,11 +102,10 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:latest
             ${{ env.IMAGE_NAME }}:${{ github.sha }}
+
       - name: Clean up test container
         if: always()
         run: docker rm -f cloudops-api-ci || true
-
-
 
   deploy:
     name: Deploy to Terraform Lab EC2
@@ -187,25 +185,67 @@ jobs:
           echo "Previous image: $OLD_IMAGE_ID"
 
           docker rm -f "$CANDIDATE"
-          docker rm -f "$CONTAINER"
 
-          echo "Starting new production container..."
+          rollback() {
+            echo "Starting rollback to previous image: $OLD_IMAGE_ID"
 
-          if ! docker run -d \
+            docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
+
+            if ! docker run -d \
+              --name "$CONTAINER" \
+              --restart unless-stopped \
+              -p 127.0.0.1:3000:3000 \
+              -e PORT=3000 \
+              "$OLD_IMAGE_ID"; then
+              echo "CRITICAL: Could not start previous production image."
+              return 1
+            fi
+
+            for i in $(seq 1 30); do
+              STATUS=$(docker inspect --format='{{.State.Health.Status}}' "$CONTAINER" 2>/dev/null || true)
+
+              if [ "$STATUS" = "healthy" ]; then
+                echo "Rollback successful. Previous version is healthy."
+                return 0
+              fi
+
+              if [ "$STATUS" = "unhealthy" ]; then
+                break
+              fi
+
+              RUNNING=$(docker inspect --format='{{.State.Running}}' "$CONTAINER" 2>/dev/null || true)
+
+              if [ "$RUNNING" != "true" ]; then
+                break
+              fi
+
+              sleep 2
+            done
+
+            echo "CRITICAL: Rollback did not become healthy."
+            docker logs "$CONTAINER" || true
+            return 1
+          }
+
+           echo "Stopping existing production container..."
+
+           if ! docker rm -f "$CONTAINER"; then
+             echo "Could not stop the existing container. Aborting deployment."
+             docker rm -f "$CANDIDATE" || true
+             exit 1
+           fi
+
+           echo "Starting new production container..."
+
+           if ! docker run -d \
             --name "$CONTAINER" \
             --restart unless-stopped \
             -p 127.0.0.1:3000:3000 \
             -e PORT=3000 \
             "$IMAGE"; then
 
-            echo "New container failed to start. Rolling back..."
-            docker rm -f "$CONTAINER" || true
-            docker run -d \
-              --name "$CONTAINER" \
-              --restart unless-stopped \
-              -p 127.0.0.1:3000:3000 \
-              -e PORT=3000 \
-              "$OLD_IMAGE_ID"
+            echo "New container failed to start."
+            rollback || exit 1
             exit 1
           fi
 
@@ -223,6 +263,12 @@ jobs:
               break
             fi
 
+            RUNNING=$(docker inspect --format='{{.State.Running}}' "$CONTAINER" 2>/dev/null || true)
+
+            if [ "$RUNNING" != "true" ]; then
+              break
+            fi
+
             sleep 2
           done
 
@@ -234,29 +280,9 @@ jobs:
           echo "New container failed health check."
           docker logs "$CONTAINER" || true
 
-          echo "Rolling back to previous image..."
-          docker rm -f "$CONTAINER" || true
+          rollback || exit 1
 
-          docker run -d \
-            --name "$CONTAINER" \
-            --restart unless-stopped \
-            -p 127.0.0.1:3000:3000 \
-            -e PORT=3000 \
-            "$OLD_IMAGE_ID"
-
-          for i in $(seq 1 30); do
-            STATUS=$(docker inspect --format='{{.State.Health.Status}}' "$CONTAINER" 2>/dev/null || true)
-
-            if [ "$STATUS" = "healthy" ]; then
-              echo "Rollback successful. Previous version is healthy."
-              exit 1
-            fi
-
-            sleep 2
-          done
-
-          echo "CRITICAL: Rollback did not become healthy."
-          docker logs "$CONTAINER" || true
+          echo "Deployment failed, but the previous version was successfully restored."
           exit 1
           REMOTE_SCRIPT
           )
@@ -308,4 +334,3 @@ jobs:
 
           echo "Deployment timed out."
           exit 1
-
