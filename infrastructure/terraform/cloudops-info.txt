@@ -1,0 +1,3 @@
+Project: CloudOps Platform
+Environment: staging
+Message: Staging environment managed by Terraform!

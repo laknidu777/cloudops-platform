@@ -137,6 +137,14 @@ jobs:
           CONTAINER="cloudops-api"
           CANDIDATE="cloudops-api-candidate"
 
+          NETWORK="cloudops-monitoring"
+
+          echo "Ensuring Docker monitoring network exists..."
+
+         if ! docker network inspect "$NETWORK" >/dev/null 2>&1; then
+          docker network create "$NETWORK"
+         fi
+
           echo "Pulling new image: $IMAGE"
           docker pull "$IMAGE"
 
@@ -146,7 +154,7 @@ jobs:
           docker run -d \
             --name "$CANDIDATE" \
             --restart no \
-            -p 127.0.0.1:3001:3000 \
+            -p 127.0.0.1:3002:3000 \
             -e PORT=3000 \
             "$IMAGE"
 
@@ -196,6 +204,8 @@ jobs:
             if ! docker run -d \
               --name "$CONTAINER" \
               --restart unless-stopped \
+              --network "$NETWORK" \
+              --network-alias cloudops-api \
               -p 127.0.0.1:3000:3000 \
               -e PORT=3000 \
               "$OLD_IMAGE_ID"; then

@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>{{ project_name }}
+</head>
+<body>
+ <h1>{{ project_name }}</h1>
+    <p>Environment: {{ deployment_environment }}</p>
+    <p>Server hostname: {{ ansible_facts["hostname"] }}</p>
+    <p>Managed automatically using Ansible.</p>
+</body>
+</html>

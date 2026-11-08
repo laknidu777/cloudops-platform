@@ -1,0 +1,57 @@
+---
+- name: Ensure monitoring directory exists
+  ansible.builtin.file:
+    path: "{{ monitoring_project_dir }}/monitoring"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Copy monitoring Compose configuration
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../../compose.monitoring.yaml"
+    dest: "{{ monitoring_project_dir }}/{{ monitoring_compose_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Copy production Prometheus configuration
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../../monitoring/{{ monitoring_prometheus_config }}"
+    dest: "{{ monitoring_project_dir }}/monitoring/prometheus.yml"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Ensure Docker monitoring network exists
+  ansible.builtin.command:
+    cmd: docker network create {{ monitoring_network }}
+  register: network_result
+  changed_when: network_result.rc == 0
+  failed_when:
+    - network_result.rc != 0
+    - "'already exists' not in network_result.stderr"
+
+- name: Connect existing API to monitoring network
+  ansible.builtin.command:
+    cmd: docker network connect --alias cloudops-api {{ monitoring_network }} cloudops-api
+  register: api_network_result
+  changed_when: api_network_result.rc == 0
+  failed_when:
+    - api_network_result.rc != 0
+    - "'already exists' not in api_network_result.stderr"
+
+- name: Validate monitoring Compose configuration
+  ansible.builtin.command:
+    cmd: docker compose -p cloudops-platform -f {{ monitoring_project_dir }}/{{ monitoring_compose_file }} config -q
+  changed_when: false
+
+- name: Start monitoring services
+  ansible.builtin.command:
+    cmd: docker compose -p cloudops-platform -f {{ monitoring_project_dir }}/{{ monitoring_compose_file }} up -d
+  register: monitoring_deploy
+  changed_when: >
+    'Started' in monitoring_deploy.stdout or
+    'Created' in monitoring_deploy.stdout or
+    'Recreated' in monitoring_deploy.stdout or
+    'Pulled' in monitoring_deploy.stderr

@@ -1,0 +1,5 @@
+---
+monitoring_project_dir: /opt/cloudops-platform
+monitoring_network: cloudops-monitoring
+monitoring_compose_file: compose.monitoring.yaml
+monitoring_prometheus_config: prometheus.ec2.yml
