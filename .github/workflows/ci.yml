@@ -1,3 +1,4 @@
+
 name: CloudOps Platform CI
 
 on:
@@ -136,14 +137,13 @@ jobs:
           IMAGE="__IMAGE__"
           CONTAINER="cloudops-api"
           CANDIDATE="cloudops-api-candidate"
-
           NETWORK="cloudops-monitoring"
 
           echo "Ensuring Docker monitoring network exists..."
 
-         if ! docker network inspect "$NETWORK" >/dev/null 2>&1; then
-          docker network create "$NETWORK"
-         fi
+          if ! docker network inspect "$NETWORK" >/dev/null 2>&1; then
+            docker network create "$NETWORK"
+          fi
 
           echo "Pulling new image: $IMAGE"
           docker pull "$IMAGE"
@@ -151,6 +151,7 @@ jobs:
           docker rm -f "$CANDIDATE" >/dev/null 2>&1 || true
 
           echo "Starting candidate container..."
+
           docker run -d \
             --name "$CANDIDATE" \
             --restart no \
@@ -239,19 +240,20 @@ jobs:
             return 1
           }
 
-           echo "Stopping existing production container..."
+          echo "Stopping existing production container..."
 
-           if ! docker rm -f "$CONTAINER"; then
-             echo "Could not stop the existing container. Aborting deployment."
-             docker rm -f "$CANDIDATE" || true
-             exit 1
-           fi
+          if ! docker rm -f "$CONTAINER"; then
+            echo "Could not stop the existing container. Aborting deployment."
+            exit 1
+          fi
 
-           echo "Starting new production container..."
+          echo "Starting new production container..."
 
-           if ! docker run -d \
+          if ! docker run -d \
             --name "$CONTAINER" \
             --restart unless-stopped \
+            --network "$NETWORK" \
+            --network-alias cloudops-api \
             -p 127.0.0.1:3000:3000 \
             -e PORT=3000 \
             "$IMAGE"; then
