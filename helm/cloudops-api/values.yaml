@@ -1,0 +1,32 @@
+replicaCount: 5
+
+image:
+  repository: cloudops-api
+  tag: "2.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+  nodePort: 30081
+
+config:
+  port: "3000"
+  nodeEnv: production
+
+secret:
+  name: cloudops-api-secret
+
+ingress:
+  enabled: true
+  className: nginx
+  host: helm.cloudops.local
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "64Mi"
+  limits:
+    cpu: "500m"
+    memory: "128Mi"
