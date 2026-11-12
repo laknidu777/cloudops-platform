@@ -18,3 +18,5 @@ infrastructure/ansible/inventory.ini
 *.bak
 # Terraform working directories
 **/.terraform/
+# Local installer packages
+*.deb
