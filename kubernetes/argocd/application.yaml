@@ -1,0 +1,30 @@
+
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+
+metadata:
+  name: cloudops-api-gitops
+  namespace: argocd
+
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/laknidu777/cloudops-platform.git
+    targetRevision: main
+    path: helm/cloudops-api
+
+    helm:
+      parameters:
+        - name: replicaCount
+          value: "2"
+        - name: ingress.enabled
+          value: "false"
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudops-gitops
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
