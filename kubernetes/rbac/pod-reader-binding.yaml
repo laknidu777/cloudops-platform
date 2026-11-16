@@ -1,0 +1,17 @@
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+
+metadata:
+  name: cloudops-viewer-binding
+  namespace: cloudops-rbac
+
+subjects:
+  - kind: ServiceAccount
+    name: cloudops-viewer
+    namespace: cloudops-rbac
+
+roleRef:
+  kind: Role
+  name: pod-reader
+  apiGroup: rbac.authorization.k8s.io
